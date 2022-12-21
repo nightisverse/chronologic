@@ -1,0 +1,65 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.0.10'
+    id 'org.beryx.jlink' version '2.24.1'
+}
+
+compileJava {
+    sourceCompatibility = '16'
+    targetCompatibility = '16'
+    options.encoding = 'UTF-8'
+}
+
+repositories {
+    mavenCentral()
+}
+
+wrapper {
+    gradleVersion = '7.3.2'
+}
+
+application {
+    mainClass = 'com.chronologic.core.ChronoLogicRunner'
+    mainModule.set("com.chronologic")
+}
+
+javafx {
+    modules = ['javafx.controls', 'javafx.fxml']
+}
+
+dependencies {
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.0")
+    implementation("com.drewnoakes:metadata-extractor:2.18.0")
+    implementation("commons-io:commons-io:2.11.0")
+    implementation('org.apache.tika:tika-core:2.6.0')
+}
+
+test {
+    useJUnitPlatform()
+}
+
+jlink {
+
+    def appVersion = '1.0'
+
+    jpackage {
+        if (org.gradle.internal.os.OperatingSystem.current().windows) {
+            imageOptions = ['--icon', 'src/main/resources/camera_icon.ico']
+        }
+    }
+
+    mergedModule {
+        additive = true
+        requires("org.slf4j")
+    }
+
+    imageZip = project.file("${buildDir}/distributions/app-${javafx.platform.classifier}.zip")
+    options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
+    version = "${appVersion}"
+    launcher {
+        name = "ChronoLogic v${appVersion}"
+    }
+
+}
