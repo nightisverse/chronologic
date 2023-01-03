@@ -29,11 +29,13 @@ javafx {
 }
 
 dependencies {
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.0")
-    implementation("com.drewnoakes:metadata-extractor:2.18.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
+
+    implementation("org.im4java:im4java:1.4.0")
     implementation("commons-io:commons-io:2.11.0")
     implementation('org.apache.tika:tika-core:2.6.0')
+    implementation("com.drewnoakes:metadata-extractor:2.18.0")
 }
 
 test {
@@ -42,7 +44,7 @@ test {
 
 jlink {
 
-    def appVersion = '1.0'
+    def appVersion = '1.1'
 
     jpackage {
         if (org.gradle.internal.os.OperatingSystem.current().windows) {

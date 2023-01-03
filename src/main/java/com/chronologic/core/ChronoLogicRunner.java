@@ -3,7 +3,10 @@ package com.chronologic.core;
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import com.chronologic.ui.Controller;
+import com.chronologic.util.AppProperties;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -42,11 +45,25 @@ public class ChronoLogicRunner extends Application {
         FXMLLoader fxmlLoader = new FXMLLoader(fxmlLocation);
         Scene scene = new Scene(fxmlLoader.load(), 795, 535);
         mainController = fxmlLoader.getController();
+        includeHeicConverterIfImageMagicIsBundled();
         stage.getIcons().add(new Image("/camera_icon.png"));
         stage.setTitle("ChronoLogic");
         stage.setScene(scene);
         stage.setResizable(false);
         stage.show();
+    }
+
+
+    private void includeHeicConverterIfImageMagicIsBundled() {
+        if (isImageMagickBundled()) {
+            mainController.showConvertHeicCheckbox();
+        }
+    }
+
+
+    private boolean isImageMagickBundled() {
+        Path imageMagickPath = Path.of(AppProperties.getAppProperty("image.magick.path"));
+        return Files.exists(imageMagickPath);
     }
 
 }
