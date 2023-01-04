@@ -1,14 +1,16 @@
 module com.chronologic {
-    requires javafx.controls;
-    requires javafx.fxml;
-    requires java.desktop;
-    requires metadata.extractor;
-    requires org.apache.commons.io;
-    requires org.apache.tika.core;
-    requires org.slf4j;
     requires java.sql;
+    requires java.desktop;
+    requires javafx.fxml;
+    requires javafx.controls;
+    requires im4java;
+    requires org.slf4j;
+    requires metadata.extractor;
+    requires org.apache.tika.core;
+    requires org.apache.commons.io;
 
-    exports com.chronologic.core;
     exports com.chronologic.ui;
+    exports com.chronologic.core;
+
     opens com.chronologic.ui to javafx.fxml;
 }

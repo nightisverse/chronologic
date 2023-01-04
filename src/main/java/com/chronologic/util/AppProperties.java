@@ -22,7 +22,7 @@ public final class AppProperties extends Properties {
             appProperties.load(inputStream);
 
         } catch (IOException ex) {
-            ex.printStackTrace();
+            throw new ExceptionInInitializerError(ex.getMessage());
         }
     }
 
