@@ -65,6 +65,7 @@ public class MediaFileRenamingTask extends Task<Void> {
         this.customDate = customDate;
     }
 
+
     @Override
     protected Void call() {
         startRenamingProcess();
@@ -85,7 +86,7 @@ public class MediaFileRenamingTask extends Task<Void> {
             throw new RuntimeException(AppProperties.getAppProperty("error.empty.folder.message"));
         } else {
             sortFilesIfCustomMode(filesToProcess);
-            renameFiles(filesToProcess);
+            copyFilesWithRenaming(filesToProcess);
         }
     }
 
@@ -97,7 +98,7 @@ public class MediaFileRenamingTask extends Task<Void> {
     }
 
 
-    private void renameFiles(File[] filesToProcess) {
+    private void copyFilesWithRenaming(File[] filesToProcess) {
         double renamingProgress = 0.00;
         double progressStep = 1.00 / filesToProcess.length;
 
@@ -119,16 +120,10 @@ public class MediaFileRenamingTask extends Task<Void> {
                 }
 
                 String newFileAbsolutePath = getNewFileAbsolutePath(mediaFile);
-
-                if (convertHeicToJpg && mediaFile.isHeicFormat()) {
-                    convertHeicToJpg(mediaFile, newFileAbsolutePath);
-                } else {
-                    FileUtils.copyFile(file, new File(newFileAbsolutePath));
-                }
+                copyFileWithRenaming(mediaFile, newFileAbsolutePath);
             }
-        } catch (InterruptedException | IM4JavaException ex) {
-            throw new MediaFileProcessingException("error.converting.failure");
-        } catch (IOException | ImageProcessingException ex) {
+
+        } catch (IOException ex) {
             throw new MediaFileProcessingException("error.file.processing.message");
         } finally {
             ChronoLogicRunner.getMainController().unbindProgressIndicator();
@@ -136,25 +131,40 @@ public class MediaFileRenamingTask extends Task<Void> {
     }
 
 
-    private String getNewFileAbsolutePath(MediaFile mediaFile) throws IOException, ImageProcessingException {
+    private String getNewFileAbsolutePath(MediaFile mediaFile) {
         String newFileAbsolutePath;
-        Date creationDate = mediaFile.getCreationDate();
 
         if (currentMode == Mode.CUSTOM) {
             newFileAbsolutePath = getNewNonConflictingFileName(mediaFile, customDate, time);
         } else {
-            if (isCreationDateValid(creationDate)) {
-                DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
-                String originalCreationDate = dateFormat.format(creationDate);
-                newFileAbsolutePath
-                        = getNewNonConflictingFileName(mediaFile, originalCreationDate, StringUtils.EMPTY);
-            } else {
-                DirectoryManager.createDirectoryForEmptyFiles();
-                newFileAbsolutePath = DirectoryManager.getOutputFolderForEmptyFilesPath() + mediaFile.getName();
-            }
+            newFileAbsolutePath = getNewFileAbsolutePathForNativeMode(mediaFile);
         }
 
         return newFileAbsolutePath;
+    }
+
+
+    private String getNewFileAbsolutePathForNativeMode(MediaFile mediaFile) {
+        try {
+            Date creationDate = mediaFile.getCreationDate();
+
+            if (isCreationDateValid(creationDate)) {
+                DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
+                String originalCreationDate = dateFormat.format(creationDate);
+                return getNewNonConflictingFileName(mediaFile, originalCreationDate, StringUtils.EMPTY);
+            } else {
+                DirectoryManager.createDirectoryForEmptyFiles();
+                return DirectoryManager.getOutputFolderForEmptyFilesPath() + mediaFile.getName();
+            }
+
+        } catch (IOException | ImageProcessingException ex) {
+            throw new MediaFileProcessingException("error.file.processing.message");
+        }
+    }
+
+
+    private boolean isCreationDateValid(Date creationDate) {
+        return creationDate != null && creationDate.after(DEFAULT_ZERO_DATE);
     }
 
 
@@ -198,24 +208,30 @@ public class MediaFileRenamingTask extends Task<Void> {
     }
 
 
-    private boolean isCreationDateValid(Date creationDate) {
-        return creationDate != null && creationDate.after(DEFAULT_ZERO_DATE);
+    private void copyFileWithRenaming(MediaFile mediaFile, String newFileAbsolutePath) throws IOException {
+        if (convertHeicToJpg && mediaFile.isHeicFormat()) {
+            convertHeicToJpg(mediaFile, newFileAbsolutePath);
+        } else {
+            FileUtils.copyFile(mediaFile.getSourceFile(), new File(newFileAbsolutePath));
+        }
     }
 
 
-    private void convertHeicToJpg(MediaFile mediaFile, String outputFileName)
-            throws IOException, InterruptedException, IM4JavaException {
+    private void convertHeicToJpg(MediaFile mediaFile, String outputFileName) {
+        try {
+            String imageMagickPath = AppProperties.getAppProperty("image.magick.path");
 
-        String imageMagickPath = AppProperties.getAppProperty("image.magick.path");
+            ConvertCmd cmd = new ConvertCmd();
+            cmd.setSearchPath(imageMagickPath);
 
-        ConvertCmd cmd = new ConvertCmd();
-        cmd.setSearchPath(imageMagickPath);
+            IMOperation operation = new IMOperation();
+            operation.addImage(mediaFile.getAbsolutePath());
+            operation.addImage(outputFileName);
 
-        IMOperation operation = new IMOperation();
-        operation.addImage(mediaFile.getAbsolutePath());
-        operation.addImage(outputFileName);
-
-        cmd.run(operation);
+            cmd.run(operation);
+        } catch (IOException | InterruptedException | IM4JavaException ex) {
+            throw new MediaFileProcessingException("error.converting.failure");
+        }
     }
 
 
@@ -246,7 +262,6 @@ public class MediaFileRenamingTask extends Task<Void> {
         setOnFailed(event -> {
             Platform.runLater(() -> {
                 ErrorHandler.showErrorMessage(getException().getMessage());
-                ChronoLogicRunner.getMainController().unbindProgressIndicator();
                 ChronoLogicRunner.getMainController().resetProgressIndicator();
             });
         });
