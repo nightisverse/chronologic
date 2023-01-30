@@ -34,6 +34,9 @@ public class Controller {
     private TextField pathField;
 
     @FXML
+    private Button browseButton;
+
+    @FXML
     private Button renameButton;
 
     @FXML
@@ -67,9 +70,10 @@ public class Controller {
 
 
     public void resetProgressIndicator() {
-        if (!isProgressIndicatorBound()) {
-            progressIndicator.setProgress(0);
+        if (isProgressIndicatorBound()) {
+            unbindProgressIndicator();
         }
+        progressIndicator.setProgress(0);
     }
 
     public void unbindProgressIndicator() {
@@ -188,6 +192,7 @@ public class Controller {
         }
 
         if (mediaFileRenamingTask != null) {
+            setUiElementsAsInteractiveTo(false);
             progressIndicator.progressProperty().bind(mediaFileRenamingTask.progressProperty());
             new Thread(mediaFileRenamingTask).start();
         }
@@ -209,6 +214,16 @@ public class Controller {
         } else {
             return null;
         }
+    }
+
+
+    public void setUiElementsAsInteractiveTo(boolean flag) {
+        browseButton.setMouseTransparent(!flag);
+        renameButton.setMouseTransparent(!flag);
+        nativeModeBtn.setMouseTransparent(!flag);
+        customModeBtn.setMouseTransparent(!flag);
+        datePicker.setMouseTransparent(!flag);
+        convertHeicCheckbox.setMouseTransparent(!flag);
     }
 
 

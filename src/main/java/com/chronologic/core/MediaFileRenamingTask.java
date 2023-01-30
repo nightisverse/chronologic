@@ -100,7 +100,7 @@ public class MediaFileRenamingTask extends Task<Void> {
 
     private void copyFilesWithRenaming(File[] filesToProcess) {
         double renamingProgress = 0.00;
-        double progressStep = 1.00 / filesToProcess.length;
+        double progressStep = Math.ceil((1.00 / filesToProcess.length) * 100.0) / 100.0;
 
         try {
             DirectoryManager.createDirectoryForRenamedFiles();
@@ -126,7 +126,7 @@ public class MediaFileRenamingTask extends Task<Void> {
         } catch (IOException ex) {
             throw new MediaFileProcessingException("error.file.processing.message");
         } finally {
-            ChronoLogicRunner.getMainController().unbindProgressIndicator();
+            ChronoLogicRunner.getMainController().setUiElementsAsInteractiveTo(true);
         }
     }
 
@@ -262,7 +262,6 @@ public class MediaFileRenamingTask extends Task<Void> {
         setOnFailed(event -> {
             Platform.runLater(() -> {
                 ErrorHandler.showErrorMessage(getException().getMessage());
-                ChronoLogicRunner.getMainController().resetProgressIndicator();
             });
         });
     }
