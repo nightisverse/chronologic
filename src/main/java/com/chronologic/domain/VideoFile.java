@@ -21,7 +21,7 @@ public class VideoFile extends MediaFile {
     protected Date extractMediaCreationDate() throws ImageProcessingException, IOException {
         Metadata metadata = ImageMetadataReader.readMetadata(getSourceFile());
         Directory directory = metadata.getFirstDirectoryOfType(Directory.class);
-        return directory.getDate(QuickTimeDirectory.TAG_CREATION_TIME);
+        return directory == null ? null : directory.getDate(QuickTimeDirectory.TAG_CREATION_TIME);
     }
 
     @Override

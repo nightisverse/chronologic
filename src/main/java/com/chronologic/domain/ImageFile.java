@@ -20,7 +20,7 @@ public class ImageFile extends MediaFile {
     protected Date extractMediaCreationDate() throws ImageProcessingException, IOException {
         Metadata metadata = ImageMetadataReader.readMetadata(getSourceFile());
         ExifSubIFDDirectory directory = metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
-        return directory.getDateOriginal();
+        return directory == null ? null : directory.getDateOriginal();
     }
 
     @Override

@@ -44,7 +44,7 @@ test {
 
 jlink {
 
-    def appVersion = '1.1'
+    def appVersion = '1.2.1'
 
     jpackage {
         if (org.gradle.internal.os.OperatingSystem.current().windows) {

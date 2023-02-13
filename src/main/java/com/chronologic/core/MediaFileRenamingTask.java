@@ -3,6 +3,7 @@ package com.chronologic.core;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.DateFormat;
@@ -99,15 +100,15 @@ public class MediaFileRenamingTask extends Task<Void> {
 
 
     private void copyFilesWithRenaming(File[] filesToProcess) {
-        double renamingProgress = 0.00;
-        double progressStep = Math.ceil((1.00 / filesToProcess.length) * 100.0) / 100.0;
+        BigDecimal renamingProgress = new BigDecimal("0.00");
+        BigDecimal progressStep = BigDecimal.valueOf(Math.ceil((1.00 / filesToProcess.length) * 100.0) / 100.0);
 
         try {
             DirectoryManager.createDirectoryForRenamedFiles();
 
             for (File file : filesToProcess) {
-                renamingProgress += progressStep;
-                updateProgress(renamingProgress, 1.00);
+                renamingProgress = renamingProgress.add(progressStep);
+                updateProgress(renamingProgress.doubleValue(), 1.00);
 
                 if (file.isDirectory()) {
                     continue;
