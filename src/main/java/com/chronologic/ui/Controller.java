@@ -1,10 +1,7 @@
 package com.chronologic.ui;
 
 import java.io.File;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.time.ZoneId;
-import java.util.Date;
+import java.time.format.DateTimeFormatter;
 import com.chronologic.core.MediaFileRenamingTask;
 import com.chronologic.core.Mode;
 import com.chronologic.util.AppProperties;
@@ -201,19 +198,15 @@ public class Controller {
 
 
     /**
-     * Gets a date value from date-picker if any and formats it.
+     * Returns a formatted string representing a selected date.
+     * The date is obtained from the 'datePicker' object and formatted using the pattern "yyyyMMdd".
      *
-     * @return String value of a date in "yyyyMMdd" format.
+     * @return null, if no value is selected.
      */
     private String getCustomDate() {
-        DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
-
-        if (datePicker.getValue() != null) {
-            return dateFormat.format(Date.from(datePicker.getValue()
-                    .atStartOfDay(ZoneId.systemDefault()).toInstant()));
-        } else {
-            return null;
-        }
+        return datePicker.getValue() != null ?
+                DateTimeFormatter.ofPattern("yyyyMMdd").format(datePicker.getValue())
+                : null;
     }
 
 
