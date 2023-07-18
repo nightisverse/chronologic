@@ -75,9 +75,8 @@ public class MediaFileRenamingTask extends Task<Void> {
 
 
     /**
-     * Copies and renames a file by appending "IMG_" prefix and original file creation date to the name.
-     * In case of Custom mode, the specified custom date is used. If the file is of video type,
-     * the "_VID" postfix is appended to the name.
+     * Renames all files in the main directory by copying them with new names.
+     * Throws a runtime exception if the main directory is empty or cannot be read.
      */
     private void startRenamingProcess() {
         File mainDirectory = new File(DirectoryManager.getMainDirectoryPath());
@@ -170,8 +169,9 @@ public class MediaFileRenamingTask extends Task<Void> {
 
 
     /**
-     * Creates a new file name, checks it for the possible name collisions in the given folder
-     * and adds an increment to a name if the collision occurs.
+     * Generates a new file name for the given media file based on the capture date and time.
+     * If the generated name conflicts with an existing file name in the given folder,
+     * increments the name and tries again.
      * Note: recursive method call is used.
      *
      * @param mediaFile media file object.
@@ -180,6 +180,7 @@ public class MediaFileRenamingTask extends Task<Void> {
      * @return unique file name within the given folder.
      */
     private String getNewNonConflictingFileName(MediaFile mediaFile, String date, String time) {
+        String fileExtension = convertHeicToJpg && mediaFile.isHeicFormat() ? "JPG" : mediaFile.getFileExtension();
         StringBuilder newFileName = new StringBuilder();
 
         newFileName.append(DirectoryManager.getOutputFolderMainPath())
@@ -188,13 +189,8 @@ public class MediaFileRenamingTask extends Task<Void> {
                 .append(time)
                 .append(mediaFile.getFileNamePostfix())
                 .append(nameIncrementPrefix)
-                .append(".");
-
-        if (convertHeicToJpg && mediaFile.isHeicFormat()) {
-            newFileName.append("JPG");
-        } else {
-            newFileName.append(mediaFile.getFileExtension());
-        }
+                .append(".")
+                .append(fileExtension);
 
         Path newFilePath = Path.of(newFileName.toString());
 
