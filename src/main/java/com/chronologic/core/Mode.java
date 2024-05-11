@@ -23,5 +23,6 @@ public enum Mode {
     public String getModeButtonId() {
         return modeButtonId;
     }
+
 }
 

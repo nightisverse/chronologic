@@ -1,10 +1,5 @@
 package com.chronologic.core;
 
-
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import com.chronologic.ui.Controller;
 import com.chronologic.util.AppProperties;
 import javafx.application.Application;
@@ -12,6 +7,11 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
+
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 
 public class ChronoLogicRunner extends Application {
@@ -47,7 +47,7 @@ public class ChronoLogicRunner extends Application {
         mainController = fxmlLoader.getController();
         includeHeicConverterIfImageMagicIsBundled();
         stage.getIcons().add(new Image("/camera_icon.png"));
-        stage.setTitle("ChronoLogic");
+        stage.setTitle("ChronoLogic v2");
         stage.setScene(scene);
         stage.setResizable(false);
         stage.show();

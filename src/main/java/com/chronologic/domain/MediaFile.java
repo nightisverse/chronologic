@@ -1,19 +1,18 @@
 package com.chronologic.domain;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Date;
-import com.drew.imaging.ImageProcessingException;
 import org.apache.commons.io.FilenameUtils;
+
+import java.io.File;
 
 public abstract class MediaFile {
 
     public static final String FILE_PREFIX = "IMG_";
     private final File sourceFile;
-    private Date creationDate;
+    private final String originalDate;
 
-    public MediaFile(File sourceFile) {
+    public MediaFile(File sourceFile, String originalDate) {
         this.sourceFile = sourceFile;
+        this.originalDate = originalDate;
     }
 
     public File getSourceFile() {
@@ -34,14 +33,9 @@ public abstract class MediaFile {
 
     public abstract String getFileNamePostfix();
 
-    public Date getCreationDate() throws ImageProcessingException, IOException {
-        if (creationDate == null) {
-            creationDate = extractMediaCreationDate();
-        }
-        return creationDate;
+    public String getOriginalDate() {
+        return originalDate;
     }
-
-    protected abstract Date extractMediaCreationDate() throws ImageProcessingException, IOException;
 
     public boolean isHeicFormat() {
         return getFileExtension().equalsIgnoreCase("HEIC");

@@ -1,7 +1,7 @@
 plugins {
     id 'java'
     id 'application'
-    id 'org.openjfx.javafxplugin' version '0.0.10'
+    id 'org.openjfx.javafxplugin' version '0.0.13'
     id 'org.beryx.jlink' version '2.24.1'
 }
 
@@ -29,13 +29,11 @@ javafx {
 }
 
 dependencies {
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.0")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.0")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
 
     implementation("org.im4java:im4java:1.4.0")
-    implementation("commons-io:commons-io:2.11.0")
-    implementation('org.apache.tika:tika-core:2.6.0')
-    implementation("com.drewnoakes:metadata-extractor:2.18.0")
+    implementation("commons-io:commons-io:2.16.1")
 }
 
 test {
@@ -44,17 +42,12 @@ test {
 
 jlink {
 
-    def appVersion = '1.2.1'
+    def appVersion = '2.0.0'
 
     jpackage {
         if (org.gradle.internal.os.OperatingSystem.current().windows) {
             imageOptions = ['--icon', 'src/main/resources/camera_icon.ico']
         }
-    }
-
-    mergedModule {
-        additive = true
-        requires("org.slf4j")
     }
 
     imageZip = project.file("${buildDir}/distributions/app-${javafx.platform.classifier}.zip")

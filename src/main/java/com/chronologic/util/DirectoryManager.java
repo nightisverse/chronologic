@@ -1,6 +1,5 @@
 package com.chronologic.util;
 
-
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
@@ -9,22 +8,22 @@ import java.nio.file.Path;
 
 public class DirectoryManager {
 
-    private final static String OUTPUT_FOLDER_MAIN = File.separator
+    private static final String OUTPUT_FOLDER_MAIN = File.separator
             + AppProperties.getAppProperty("output.folder.name.main") + File.separator;
-    private final static String OUTPUT_FOLDER_FOR_EMPTY_FILES = File.separator
+
+    private static final String OUTPUT_FOLDER_FOR_EMPTY_FILES = File.separator
             + AppProperties.getAppProperty("output.folder.name.empty") + File.separator;
 
     private static String mainDirectoryPath;
     private static String outputFolderMainPath;
     private static String outputFolderForEmptyFilesPath;
 
-
     public static String getMainDirectoryPath() {
         return mainDirectoryPath;
     }
 
 
-    public static void setMainDirectoryPath(String mainDirectoryPathToSet) {
+    public static void initDirectoryPaths(String mainDirectoryPathToSet) {
         mainDirectoryPath = mainDirectoryPathToSet;
         outputFolderMainPath = mainDirectoryPath + OUTPUT_FOLDER_MAIN;
         outputFolderForEmptyFilesPath = mainDirectoryPath + OUTPUT_FOLDER_FOR_EMPTY_FILES;
@@ -41,17 +40,17 @@ public class DirectoryManager {
     }
 
 
-    public static void createDirectoryForRenamedFiles() throws RuntimeException {
+    public static void createDirectoryForRenamedFiles() {
         createDirectory(outputFolderMainPath);
     }
 
 
-    public static void createDirectoryForEmptyFiles() throws RuntimeException {
+    public static void createDirectoryForEmptyFiles() {
         createDirectory(outputFolderForEmptyFilesPath);
     }
 
 
-    public static void createDirectory(String dirPath) throws RuntimeException {
+    public static void createDirectory(String dirPath) {
         Path path = Path.of(dirPath);
 
         if (!Files.exists(path)) {

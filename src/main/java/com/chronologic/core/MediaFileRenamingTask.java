@@ -1,40 +1,31 @@
 package com.chronologic.core;
 
+import com.chronologic.domain.MediaFile;
+import com.chronologic.util.AppProperties;
+import com.chronologic.util.DirectoryManager;
+import com.chronologic.util.ErrorHandler;
+import com.chronologic.util.ExifTool;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
+import org.apache.commons.io.FileUtils;
+import org.im4java.core.ConvertCmd;
+import org.im4java.core.IM4JavaException;
+import org.im4java.core.IMOperation;
 
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
+import java.util.List;
 import java.util.regex.Pattern;
-import com.chronologic.domain.MediaFile;
-import com.chronologic.domain.MediaFileFactory;
-import com.chronologic.util.AppProperties;
-import com.chronologic.util.DirectoryManager;
-import com.chronologic.util.ErrorHandler;
-import com.drew.imaging.ImageProcessingException;
-import javafx.application.Platform;
-import javafx.concurrent.Task;
-import org.apache.commons.io.FileUtils;
-import org.apache.tika.utils.StringUtils;
-import org.im4java.core.ConvertCmd;
-import org.im4java.core.IM4JavaException;
-import org.im4java.core.IMOperation;
 
 
 public class MediaFileRenamingTask extends Task<Void> {
 
-    private final Date DEFAULT_ZERO_DATE;
-    private final String DATE_FORMAT = "yyyyMMdd_HHmmss";
-    private final Pattern timePattern = Pattern.compile("\\d+");
-
     private final Mode currentMode;
     private final boolean convertHeicToJpg;
+    private final Pattern timePattern = Pattern.compile("\\d+");
 
     private String customDate;
     private String time = "_000001";
@@ -44,15 +35,7 @@ public class MediaFileRenamingTask extends Task<Void> {
     {
         setOnSucceeded();
         setOnFailed();
-
-        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
-        try {
-            DEFAULT_ZERO_DATE = formatter.parse("12-12-1904");
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
     }
-
 
     public MediaFileRenamingTask(Mode currentMode, boolean convertHeicToJpg) {
         this.currentMode = currentMode;
@@ -69,64 +52,52 @@ public class MediaFileRenamingTask extends Task<Void> {
 
     @Override
     protected Void call() {
-        startRenamingProcess();
-        return null;
+        try {
+            initializeProgressIndicator();
+            startRenamingProcess();
+            return null;
+        } finally {
+            ChronoLogicRunner.getMainController().setUiElementsAsInteractiveTo(true);
+        }
     }
 
+    private void initializeProgressIndicator() {
+        double start = 0.00;
+        double end = 1.00;
+        updateProgress(start, end);
+    }
 
     /**
      * Renames all files in the main directory by copying them with new names.
      * Throws a runtime exception if the main directory is empty or cannot be read.
      */
     private void startRenamingProcess() {
-        File mainDirectory = new File(DirectoryManager.getMainDirectoryPath());
-        File[] filesToProcess = mainDirectory.listFiles();
+        ExifTool exifTool = new ExifTool(DirectoryManager.getMainDirectoryPath());
+        List<MediaFile> mediaFiles = exifTool.runExifTool();
 
-        if (filesToProcess == null) {
+        if (mediaFiles.isEmpty()) {
             throw new RuntimeException(AppProperties.getAppProperty("error.empty.folder.message"));
         } else {
-            sortFilesIfCustomMode(filesToProcess);
-            copyFilesWithRenaming(filesToProcess);
+            copyFilesWithRenaming(mediaFiles);
         }
     }
 
-
-    private void sortFilesIfCustomMode(File[] filesToProcess) {
-        if (currentMode == Mode.CUSTOM) {
-            Arrays.sort(filesToProcess);
-        }
-    }
-
-
-    private void copyFilesWithRenaming(File[] filesToProcess) {
+    private void copyFilesWithRenaming(List<MediaFile> filesToProcess) {
         BigDecimal renamingProgress = new BigDecimal("0.00");
-        BigDecimal progressStep = BigDecimal.valueOf(Math.ceil((1.00 / filesToProcess.length) * 100.0) / 100.0);
+        BigDecimal progressStep = BigDecimal.valueOf(Math.ceil((1.00 / filesToProcess.size()) * 100.0) / 100.0);
 
         try {
             DirectoryManager.createDirectoryForRenamedFiles();
 
-            for (File file : filesToProcess) {
+            for (MediaFile mediaFile : filesToProcess) {
                 renamingProgress = renamingProgress.add(progressStep);
                 updateProgress(renamingProgress.doubleValue(), 1.00);
-
-                if (file.isDirectory()) {
-                    continue;
-                }
-
-                MediaFile mediaFile = MediaFileFactory.createMediaFile(file);
-
-                if (mediaFile == null) {
-                    continue;
-                }
 
                 String newFileAbsolutePath = getNewFileAbsolutePath(mediaFile);
                 copyFileWithRenaming(mediaFile, newFileAbsolutePath);
             }
-
         } catch (IOException ex) {
             throw new MediaFileProcessingException("error.file.processing.message");
-        } finally {
-            ChronoLogicRunner.getMainController().setUiElementsAsInteractiveTo(true);
         }
     }
 
@@ -145,26 +116,30 @@ public class MediaFileRenamingTask extends Task<Void> {
 
 
     private String getNewFileAbsolutePathForNativeMode(MediaFile mediaFile) {
-        try {
-            Date creationDate = mediaFile.getCreationDate();
+        String originalDate = mediaFile.getOriginalDate();
 
-            if (isCreationDateValid(creationDate)) {
-                DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
-                String originalCreationDate = dateFormat.format(creationDate);
-                return getNewNonConflictingFileName(mediaFile, originalCreationDate, StringUtils.EMPTY);
-            } else {
-                DirectoryManager.createDirectoryForEmptyFiles();
-                return DirectoryManager.getOutputFolderForEmptyFilesPath() + mediaFile.getName();
-            }
+        if (isOriginalDateValid(originalDate)) {
+            return getNewNonConflictingFileName(mediaFile, originalDate, "");
+        } else {
+            DirectoryManager.createDirectoryForEmptyFiles();
+            String newFileAbsolutePath = DirectoryManager.getOutputFolderForEmptyFilesPath() + mediaFile.getName();
 
-        } catch (IOException | ImageProcessingException ex) {
-            throw new MediaFileProcessingException("error.file.processing.message");
+            return convertHeicToJpg && mediaFile.isHeicFormat()
+                    ? updateFileNameExtension(newFileAbsolutePath, "JPG")
+                    : newFileAbsolutePath;
         }
     }
 
 
-    private boolean isCreationDateValid(Date creationDate) {
-        return creationDate != null && creationDate.after(DEFAULT_ZERO_DATE);
+    private boolean isOriginalDateValid(String originalDate) {
+        return originalDate != null && !originalDate.equals("-");
+    }
+
+
+    private String updateFileNameExtension(String fileName, String newExtension) {
+        int extensionStartIndex = fileName.lastIndexOf(".") + 1;
+        String fileNameWithoutExtension = fileName.substring(0, extensionStartIndex);
+        return fileNameWithoutExtension + newExtension;
     }
 
 

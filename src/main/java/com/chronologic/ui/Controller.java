@@ -1,7 +1,5 @@
 package com.chronologic.ui;
 
-import java.io.File;
-import java.time.format.DateTimeFormatter;
 import com.chronologic.core.MediaFileRenamingTask;
 import com.chronologic.core.Mode;
 import com.chronologic.util.AppProperties;
@@ -21,6 +19,9 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+
+import java.io.File;
+import java.time.format.DateTimeFormatter;
 
 public class Controller {
 
@@ -99,7 +100,7 @@ public class Controller {
         resetProgressIndicator();
 
         if (file != null) {
-            DirectoryManager.setMainDirectoryPath(file.getAbsolutePath());
+            DirectoryManager.initDirectoryPaths(file.getAbsolutePath());
             pathField.setText(file.getAbsolutePath());
             prepareUiControls();
         }
