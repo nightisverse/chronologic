@@ -51,7 +51,8 @@
                         <Font name="Calibri" size="12.0"/>
                     </font>
                 </TextField>
-                <Button fx:id="browseButton" contentDisplay="CENTER" layoutX="50.0" layoutY="500.0" mnemonicParsing="false"
+                <Button fx:id="browseButton" contentDisplay="CENTER" layoutX="50.0" layoutY="500.0"
+                        mnemonicParsing="false"
                         onAction="#browseDirectoryButtonClick" prefHeight="25.0" prefWidth="85.0"
                         style="-fx-background-color: #05396B;" text="Browse" textFill="WHITE" translateX="18.0"
                         translateY="85.0">
@@ -74,7 +75,7 @@
                     </toggleGroup>
                     <tooltip>
                         <Tooltip fx:id="nativeTooltip" opacity="0.95"
-                                 text="Checks the file metadata for an exposure time and sets it in the new file name copying the file in the new folder.&#10;If the file does not have an exposure time, then the file is copied in the separate folder without changes.&#10;Works only for image and video files. All the other file types are skipped.&#10;Image file name example: IMG_20190322_110945.JPG"
+                                 text="Checks the file metadata for an exposure time and sets it in the new file name copying the file in the new folder.&#10;If the file does not have an exposure time, then the file is copied in the separate folder without changes.&#10;Works only for image and video files. All the other file types are skipped.&#10;Image file name example: IMG_YYYYMMDD_HHMMSS.JPG"
                                  wrapText="true">
                             <font>
                                 <Font size="12.5"/>
@@ -90,7 +91,7 @@
                     </font>
                     <tooltip>
                         <Tooltip fx:id="customTooltip"
-                                 text="Takes the provided custom date and sets it in the new file name copying the file in the new folder.&#10;Works only for image and video files. All the other file types are skipped.&#10;Video file name example: IMG_20160826_212249_VID.MOV">
+                                 text="Takes the provided custom date and sets it in the new file name copying the file in the new folder.&#10;Works only for image and video files. All the other file types are skipped.&#10;Video file name example: IMG_YYYYMMDD_HHMMSS_VID.MOV">
                             <font>
                                 <Font size="12.5"/>
                             </font>

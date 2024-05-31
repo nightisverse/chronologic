@@ -28,7 +28,7 @@ public class ExifTool {
         StringBuilder command = new StringBuilder();
         command.append("exiftool")
                 .append(" -p \"$filename:$mimeType:$dateTimeOriginal:$creationDate\"")
-                .append(" -d \"%Y%d%m_%H%M%S\"")
+                .append(" -d \"%Y%m%d_%H%M%S\"")
                 .append(" -q -f -m")
                 .append(" ")
                 .append("\"")
