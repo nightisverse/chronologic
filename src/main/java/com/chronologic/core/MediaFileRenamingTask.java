@@ -116,10 +116,10 @@ public class MediaFileRenamingTask extends Task<Void> {
 
 
     private String getNewFileAbsolutePathForNativeMode(MediaFile mediaFile) {
-        String originalDate = mediaFile.getOriginalDate();
+        String captureDate = mediaFile.getCaptureDate();
 
-        if (isOriginalDateValid(originalDate)) {
-            return getNewNonConflictingFileName(mediaFile, originalDate, "");
+        if (isCaptureDateValid(captureDate)) {
+            return getNewNonConflictingFileName(mediaFile, captureDate, "");
         } else {
             DirectoryManager.createDirectoryForEmptyFiles();
             String newFileAbsolutePath = DirectoryManager.getOutputFolderForEmptyFilesPath() + mediaFile.getName();
@@ -131,8 +131,8 @@ public class MediaFileRenamingTask extends Task<Void> {
     }
 
 
-    private boolean isOriginalDateValid(String originalDate) {
-        return originalDate != null && !originalDate.equals("-");
+    private boolean isCaptureDateValid(String captureDate) {
+        return captureDate != null && !captureDate.equals("-");
     }
 
 

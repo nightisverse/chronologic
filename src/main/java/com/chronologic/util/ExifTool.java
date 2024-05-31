@@ -27,7 +27,7 @@ public class ExifTool {
     public List<MediaFile> runExifTool() {
         StringBuilder command = new StringBuilder();
         command.append("exiftool")
-                .append(" -p \"$filename:$mimeType:$dateTimeOriginal\"")
+                .append(" -p \"$filename:$mimeType:$dateTimeOriginal:$creationDate\"")
                 .append(" -d \"%Y%d%m_%H%M%S\"")
                 .append(" -q -f -m")
                 .append(" ")
@@ -67,13 +67,15 @@ public class ExifTool {
                 String name = metadata[0];
                 String mimeType = metadata[1];
                 String originalDate = metadata[2];
+                String creationDate = metadata[3];
 
                 if (name.equals("-") || !MimeType.isSupportedType(mimeType)) {
                     continue;
                 }
 
                 File file = new File(this.mediaFolderPath + File.separator + name);
-                MediaFile mediaFile = MediaFileFactory.createMediaFile(file, MimeType.getEnum(mimeType), originalDate);
+                MediaFile mediaFile = MediaFileFactory
+                        .createMediaFile(file, MimeType.getEnum(mimeType), originalDate, creationDate);
                 mediaFiles.add(mediaFile);
             }
         } catch (IOException ex) {

@@ -42,7 +42,7 @@ test {
 
 jlink {
 
-    def appVersion = '2.0.0'
+    def appVersion = '2.0.1'
 
     jpackage {
         if (org.gradle.internal.os.OperatingSystem.current().windows) {

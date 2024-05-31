@@ -8,11 +8,11 @@ public abstract class MediaFile {
 
     public static final String FILE_PREFIX = "IMG_";
     private final File sourceFile;
-    private final String originalDate;
+    private final String captureDate;
 
-    public MediaFile(File sourceFile, String originalDate) {
+    public MediaFile(File sourceFile, String captureDate) {
         this.sourceFile = sourceFile;
-        this.originalDate = originalDate;
+        this.captureDate = captureDate;
     }
 
     public File getSourceFile() {
@@ -33,8 +33,8 @@ public abstract class MediaFile {
 
     public abstract String getFileNamePostfix();
 
-    public String getOriginalDate() {
-        return originalDate;
+    public String getCaptureDate() {
+        return captureDate;
     }
 
     public boolean isHeicFormat() {
